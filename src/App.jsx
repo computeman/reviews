@@ -1,11 +1,18 @@
-import React from "react";
-import Reviews from "./Reviews";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProductsComponent from "./ProductsComponent";
+import ReviewComponent from "./ReviewComponent";
+import Login from "./Login";
+
 
 const App = () => {
   return (
-    <div className="App">
-      <Reviews />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ProductsComponent />} />
+        <Route path="/reviews/:productId" element={<ReviewComponent />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
