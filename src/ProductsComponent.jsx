@@ -3,12 +3,18 @@ import { useNavigate } from "react-router-dom";
 
 const ProductsComponent = () => {
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
 
   const handleProductClick = (productId) => {
     navigate(`/reviews/${productId}`);
   };
+  const filteredProducts = products.filter((product) => {
+    const searchTermLowerCase = searchTerm.toLowerCase();
+    const productNameLowerCase = product.name.toLowerCase();
+    return productNameLowerCase.includes(searchTermLowerCase);
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -42,8 +48,15 @@ const ProductsComponent = () => {
 
   return (
     <div>
+      <h1>Products Page</h1>
+      <input
+        type="text"
+        placeholder="Search products"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <ul>
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <li key={product.id}>
             <button onClick={() => handleProductClick(product.id)}>
               {product.name}

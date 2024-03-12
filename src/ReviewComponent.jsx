@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import StarRatings from "react-star-ratings";
+import "./Review.css";
 
 const ReviewComponent = () => {
   // State to store user details and reviews
@@ -9,8 +11,28 @@ const ReviewComponent = () => {
   const { productId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [rating, setNewRating] = useState("");
+  const [rating, setNewRating] = useState(0);
   const [comment, setNewComment] = useState("");
+  const [ratingCounts, setRatingCounts] = useState({});
+
+  useEffect(() => {
+    const fetchRatingCounts = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/reviews/${productId}/rating-counts`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch rating counts");
+        }
+        const ratingCounts = await response.json();
+        setRatingCounts(ratingCounts);
+      } catch (error) {
+        console.error("Error fetching rating counts:", error);
+      }
+    };
+
+    fetchRatingCounts();
+  }, [productId]);
 
   // Function to fetch current user
   const fetchCurrentUser = async () => {
@@ -27,7 +49,7 @@ const ReviewComponent = () => {
 
       const data = await response.json();
       setCurrentUser(data);
-      console.log(data.id);
+      console.log(`Current user: ${data.id}`);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -55,6 +77,7 @@ const ReviewComponent = () => {
       }
 
       alert("Review successfully posted");
+      fetchReviewsForProduct();
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Failed to submit review");
@@ -80,7 +103,7 @@ const ReviewComponent = () => {
       const data = await response.json();
       setReviews(data);
       setIsLoading(false);
-      console.log(data);
+      console.log(`reviews ${data}`);
     } catch (error) {
       console.error("Error fetching reviews:", error);
       setError("Failed to load reviews.");
@@ -120,7 +143,7 @@ const ReviewComponent = () => {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         }
       );
@@ -130,7 +153,7 @@ const ReviewComponent = () => {
       }
 
       alert("Review deleted successfully");
-      // Optionally, fetch the updated list of reviews here
+      fetchReviewsForProduct(productId);
     } catch (error) {
       console.error("Error deleting review:", error);
       alert("Failed to delete review");
@@ -144,62 +167,98 @@ const ReviewComponent = () => {
     fetchReviewsForProduct(productId); // Fetch reviews for the specific product
   }, [productId]);
 
-  // Your component's render logic goes here
-
   return (
-    <div className="container mx-auto p-4">
-      {/* Loading and error state handling */}
-      {isLoading ? (
-        <p>Loading reviews...</p>
-      ) : error ? (
-        <p className="error">{error}</p>
-      ) : reviews.length === 0 ? (
-        <p>No reviews yet.</p>
-      ) : (
-        <>
-          {" "}
-          {/* Render reviews list and form only if reviews exist */}
-          {/* Review Creation Form */}
-          {hasPurchased && (
-            <div className="review-form">
-              <h2>Add Your Review</h2>
-              <form onSubmit={handleSubmit}>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={rating}
-                  onChange={(e) => setNewRating(e.target.value)}
-                  placeholder="Rating (1-5)"
-                  required
-                />
-                <textarea
-                  value={comment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Write your review"
-                  required
-                />
-                <button type="submit">Submit Review</button>
-              </form>
-            </div>
-          )}
-          {/* Reviews Display */}
-          <ul className="review-list">
-            {reviews.map((review) => (
-              <li key={review.id} className="review-item">
-                <h3>Rating: {review.rating}</h3>
-                <p>{review.comments}</p>
-                {/* Delete button for current user's reviews */}
-                {currentUser && review.userId === currentUser.id && (
-                  <button onClick={() => deleteReview(review.id)}>
-                    Delete
+    <div className="container">
+      <div className="rating-breakdown">
+        {[5, 4, 3, 2, 1].map((rating) => (
+          <div key={rating} className="rating-stars">
+            <StarRatings
+              rating={rating}
+              starRatedColor="gold"
+              numberOfStars={5}
+              starDimension="15px" // Adjust size
+              starSpacing="2px"
+              isAggregateRating={true} // Read-only
+            />
+            <span>({ratingCounts[rating] || 0})</span>
+          </div>
+        ))}
+      </div>
+      <div className="reviews-container">
+        {/* Loading and error state handling */}
+        {isLoading ? (
+          <p className="loading-text">Loading reviews...</p>
+        ) : error ? (
+          <p className="error-text">{error}</p>
+        ) : reviews.length === 0 ? (
+          <p className="no-reviews-text">No reviews yet.</p>
+        ) : (
+          <>
+            {/* Render reviews list and form only if reviews exist */}
+            {/* Review Creation Form */}
+            {hasPurchased && (
+              <div className="review-form">
+                <h2 className="form-heading">Add Your Review</h2>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(productId, rating, comment);
+                  }}
+                  className="submit-form"
+                >
+                  <StarRatings
+                    rating={Number(rating)}
+                    starRatedColor="gold"
+                    changeRating={setNewRating}
+                    numberOfStars={5}
+                    name="rating"
+                    starDimension="30px"
+                    starSpacing="5px"
+                  />
+                  <textarea
+                    className="comment-textarea"
+                    value={comment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Write your review"
+                    required
+                  />
+                  <button type="submit" className="submit-btn">
+                    Submit Review
                   </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+                </form>
+              </div>
+            )}
+            {/* Reviews Display */}
+            <ul className="review-list">
+              {reviews.map((review) => (
+                <li key={review.id} className="review-item">
+                  <h3 className="review-rating">
+                    Rating:
+                    <StarRatings
+                      rating={review.name}
+                      starRatedColor="gold"
+                      numberOfStars={5}
+                      starDimension="20px"
+                      starSpacing="3px"
+                      isAggregateRating={true}
+                    />
+                  </h3>
+                  <p className="review-comment">{review.comments}</p>
+                  {/* Delete button for current user's reviews */}
+                  {currentUser && review.userId === currentUser.id && (
+                    <button
+                      onClick={() => deleteReview(review.id)}
+                      className="delete-btn"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </div>
   );
 };

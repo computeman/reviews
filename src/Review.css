@@ -1,0 +1,105 @@
+/* General container styles */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Breakdown and Reviews Container Styles */
+.rating-breakdown {
+  width: 200px; /* Set a fixed width for the first div */
+  display: flex;
+  flex-direction: column;
+}
+
+.reviews-container {
+  flex-grow: 1; /* Allow the second div to take up remaining space */
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px; /* Add some spacing between the divs */
+}
+
+/* Rest of your existing styles... */
+
+/* Individual Rating Styles */
+.rating-stars {
+  margin-bottom: 10px; /* Add spacing between rating groups */
+}
+
+.loading-text,
+.error-text,
+.no-reviews-text {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Review form styling */
+.review-form {
+  background-color: #f0f0f0;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.form-heading {
+  margin-bottom: 15px;
+}
+
+.submit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.rating-input,
+.comment-textarea {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Reviews list styling */
+.review-list {
+  list-style: none;
+  padding: 0;
+}
+
+.review-item {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.review-rating,
+.review-comment {
+  margin: 5px 0;
+}
+
+.delete-btn {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #cc4a37;
+}
